@@ -44,6 +44,7 @@ def run_main_mixture_example():
     inflection_x = x_vals[sign_change]
     inflection_g = g_vals[sign_change]
 
+
     plot_mixture_example(ttf_data1, ttf_data2, ttf_data3,
                              ttf_data, x_vals, cdf,
                              mrl_physical, g_vals, mrl_transformed,

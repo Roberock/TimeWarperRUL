@@ -28,10 +28,10 @@ def run_univariate_example():
 
 
     # Compute RUL intervals
-    s_plus, s_minus = tw.compute_rul_interval(tw.g_vals, alpha=0.05)
-
+    alpha = 0.05
+    s_plus, s_minus = tw.compute_rul_interval(tw.g_vals, alpha=alpha)
     idx_valid = s_plus > s_minus
-
+    L_alpha, U_alpha = tw.compute_rul_interval_original_time(alpha=alpha)
     # Create two subplots: one vs g(t), one vs time t
     fig, axs = plt.subplots(1, 2, figsize=(14, 6), sharey=True)
 
@@ -44,13 +44,12 @@ def run_univariate_example():
     axs[0].legend()
 
     # Plot  time t vs [s- s+]
-    axs[1].plot(tw.t_grid[idx_valid], s_plus[idx_valid], 'g--', label='s⁺(t)', linewidth=CONF_PLOT['linewidth'])
-    axs[1].plot(tw.t_grid[idx_valid], s_minus[idx_valid], 'b--', label='s⁻(t)', linewidth=CONF_PLOT['linewidth'])
+    axs[1].plot(tw.t_grid[idx_valid], U_alpha[idx_valid], 'g--', label='U(t)', linewidth=CONF_PLOT['linewidth'])
+    axs[1].plot(tw.t_grid[idx_valid], L_alpha[idx_valid], 'b--', label='L(t)', linewidth=CONF_PLOT['linewidth'])
     axs[1].set_xlabel('Time t')
     axs[1].set_title('RUL vs time t')
     axs[1].grid(True)
     axs[1].legend()
-
     plt.tight_layout()
     plt.show()
 

@@ -3,6 +3,7 @@ from scipy.ndimage import gaussian_filter1d
 from typing import Literal
 from rul_timewarping.utils import compute_g_non_parametric, get_non_param_reliability
 from scipy.stats import gaussian_kde
+from scipy.interpolate import interp1d
 
 class TimeWarping:
     """
@@ -34,13 +35,14 @@ class TimeWarping:
 
         # Compute g(t)
         self.g_vals = g_vals
-
+        self.g_inv = self._get_g_inverse()
 
     def _make_grid(self) -> np.ndarray:
         """Create an evaluation grid combining percentiles and uniform spacing."""
         pcts = np.percentile(self.ttf_data, np.linspace(0, 100, 300))
         base = np.linspace(0, np.max(self.ttf_data), 200)
         return np.unique(np.concatenate([pcts, base]))
+
 
     def _empirical_reliability(self, t: float) -> float:
         """Empirical reliability R(t) from sorted samples."""
@@ -55,8 +57,12 @@ class TimeWarping:
         exponent = self.k / (1 - self.k)
         return (self.mu / self.k) * (1 - np.power(R_vals, exponent))
 
-    def estimate_inflection_points(
-        self, ):
+    def _get_g_inverse(self):
+        # Construct numerical inverse of g(t)
+        return interp1d(self.g_vals, self.t_grid, bounds_error=False, fill_value="extrapolate")
+
+
+    def estimate_inflection_points(self):
         """
         Estimate inflection points where g''(t) crosses zero.
 
@@ -93,4 +99,31 @@ class TimeWarping:
         exponent = self.k / (1 - self.k)
         s_plus = factor * (1 - (alpha / 2) ** exponent)
         s_minus = factor * (1 - (1 - alpha / 2) ** exponent)
+
         return s_plus, s_minus
+
+    def compute_rul_interval_original_time(self, alpha: float = 0.05) -> tuple[np.ndarray, np.ndarray]:
+        """
+        Compute upper and lower RUL interval bounds at time t.
+
+        Args:
+            t     : Array of time points
+            alpha : Significance level (default 0.05 for 95% interval)
+
+        Returns:
+            Tuple of arrays (s_plus, s_minus) representing upper and lower bounds
+        """
+
+        # Compute RUL intervals
+        s_plus, s_minus = self.compute_rul_interval(self.g_vals, alpha=alpha)
+        idx_valid = s_plus > s_minus
+
+        # Compute lower and upper bounds in time domain
+        g_t = self.g_vals[idx_valid]
+        s_minus_g = s_minus[idx_valid]
+        s_plus_g = s_plus[idx_valid]
+
+        L_alpha = self.g_inv(g_t + s_minus_g) - self.t_grid[idx_valid]
+        U_alpha = self.g_inv(g_t + s_plus_g) - self.t_grid[idx_valid]
+
+        return L_alpha, U_alpha
