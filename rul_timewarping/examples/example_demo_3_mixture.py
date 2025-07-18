@@ -13,13 +13,17 @@ def run_main_mixture_example():
     np.random.seed(42)
 
     # Simulated TTF mixture data
+    # ttf_data1 = np.random.weibull(a=5.5, size=size) * 3500
+    # ttf_data2 = np.random.beta(a=1.5, b=2, size=size) * 3500 + 3000
+    # ttf_data3 = np.random.normal(loc=5000, scale=2500, size=size) + 5000
+
     ttf_data1 = np.random.weibull(a=5.5, size=size) * 3500
-    ttf_data2 = np.random.beta(a=1.5, b=2, size=size) * 3500 + 3000
-    ttf_data3 = np.random.normal(loc=5000, scale=2500, size=size) + 5000
+    ttf_data2 = np.random.weibull(a=2, size=size) * 1500 + 2000
+    ttf_data3 = np.random.weibull(a=6, size=size) * 500
     ttf_data = np.concatenate((ttf_data1, ttf_data2, ttf_data3))
 
     # Estimate g(t)
-    k_est, mu_est, x_vals, g_vals = compute_g_non_parametric(ttf_data)
+    k_est, mu_est, x_vals, g_vals , R = compute_g_non_parametric(ttf_data)
 
     # Fit KDE and get R(t)
     kde_combined = gaussian_kde(ttf_data)
@@ -33,7 +37,6 @@ def run_main_mixture_example():
 
 
     # --- Inflection Points Plot ---
-
     # Compute derivatives of g(t)
     dg_dt = np.gradient(g_vals, x_vals)
     d2g_dt2 = np.gradient(dg_dt, x_vals)

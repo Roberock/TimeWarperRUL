@@ -26,6 +26,7 @@ def get_non_param_reliability(x_vals, ttf_data):
 
 # Function to estimate degradation slope k from TTF data
 def estimate_k(ttf_data):
+    """ estimate k from time to failure data (via coefficient of variation)"""
     mu = np.mean(ttf_data)
     sigma = np.std(ttf_data)
     cv = sigma / mu
@@ -34,6 +35,7 @@ def estimate_k(ttf_data):
 
 
 def compute_g_non_parametric(ttf_data):
+    """ compute nonparametric G(t) """
     # Estimate k and mu
     k, mu = estimate_k(ttf_data)
     # Fit KDE
@@ -45,7 +47,8 @@ def compute_g_non_parametric(ttf_data):
     R = 1 - cdf
     # Compute time transformation g(t)
     g = (mu / k) * (1 - R ** (k / (1 - k)))
-    return k, mu, x, g
+    return k, mu, x, g, R
+
 
 # MRL computation
 def compute_mrl(x_vals, R_vals):
@@ -57,3 +60,4 @@ def compute_mrl(x_vals, R_vals):
         integral = simps(R_tail, tail)
         mrl.append(integral / R_vals[i] if R_vals[i] > 1e-6 else 0)
     return np.array(mrl)
+

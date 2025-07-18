@@ -26,11 +26,11 @@ class TimeWarping:
         self.mu = np.mean(self.ttf_data)
         self.cv = np.std(self.ttf_data)  / (self.mu + 1e-10)
         self.kde = gaussian_kde(ttf_data)
-        k_est, mu_est, x_vals, g_vals = compute_g_non_parametric(ttf_data)
+        k_est, mu_est, x_vals, g_vals, reliability = compute_g_non_parametric(ttf_data)
         self.k = k_est
         self.t_grid = x_vals
-        self._reliability = get_non_param_reliability(self.t_grid, self.ttf_data)
-        self._kde_cdf = 1-self._reliability
+        self._reliability = reliability
+        self._kde_cdf = 1 - reliability
 
         # Compute g(t)
         self.g_vals = g_vals
@@ -76,3 +76,21 @@ class TimeWarping:
         inflection_x = self.t_grid[sign_change]
         inflection_g = self.g_vals[sign_change]
         return inflection_x, inflection_g
+
+
+    def compute_rul_interval(self, t: np.ndarray, alpha: float = 0.05) -> tuple[np.ndarray, np.ndarray]:
+        """
+        Compute upper and lower RUL interval bounds at time t.
+
+        Args:
+            t     : Array of time points
+            alpha : Significance level (default 0.05 for 95% interval)
+
+        Returns:
+            Tuple of arrays (s_plus, s_minus) representing upper and lower bounds
+        """
+        factor = self.mu / self.k - t
+        exponent = self.k / (1 - self.k)
+        s_plus = factor * (1 - (alpha / 2) ** exponent)
+        s_minus = factor * (1 - (1 - alpha / 2) ** exponent)
+        return s_plus, s_minus
