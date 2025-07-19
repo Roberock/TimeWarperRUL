@@ -40,7 +40,7 @@ def compute_g_non_parametric(ttf_data):
     k, mu = estimate_k(ttf_data)
     # Fit KDE
     kde = gaussian_kde(ttf_data)
-    x = np.linspace(0, np.max(ttf_data), 2000)
+    x = np.linspace(0, np.max(ttf_data), 5000)
     pdf = kde(x)
     # Compute CDF and Reliability R(t)
     cdf = cumtrapz(pdf, x, initial=0)

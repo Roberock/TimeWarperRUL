@@ -26,7 +26,7 @@ def plot_mixture_example(ttf_data1, ttf_data2, ttf_data3,
                          ttf_data, x_vals, cdf,
                          mrl_physical, g_vals, mrl_transformed,
                          inflection_x, inflection_g,
-                         pdf, sign_change):
+                         pdf, sign_change, s_plus, s_minus, L_alpha, U_alpha):
 
     # Create 3x2 subplot
     fig, ax = plt.subplots(3, 2, figsize=(14, 10))
@@ -53,6 +53,8 @@ def plot_mixture_example(ttf_data1, ttf_data2, ttf_data3,
 
     # Bottom left: MRL in physical time
     ax[1, 0].plot(x_vals, mrl_physical, label="MRL (physical time)", color="blue")
+    ax[1, 0].plot(x_vals, U_alpha, label="Upper", color="red")
+    ax[1, 0].plot(x_vals, L_alpha, label="Lower", color="red")
     ax[1, 0].set_xlabel("t")
     ax[1, 0].set_ylabel("MRL(t)")
     ax[1, 0].set_title("MRL in Physical Time")
@@ -60,7 +62,11 @@ def plot_mixture_example(ttf_data1, ttf_data2, ttf_data3,
     ax[1, 0].legend()
 
     # Bottom right: MRL in transformed time
+
+    idx_valid = s_plus > s_minus
     ax[1, 1].plot(g_vals, mrl_transformed, label="MRL (transformed time)", color="green")
+    ax[1, 1].plot(g_vals[idx_valid], s_minus[idx_valid], label="Lower", color="red")
+    ax[1, 1].plot(g_vals[idx_valid], s_plus[idx_valid], label="Upper", color="red")
     ax[1, 1].set_xlabel("g(t)")
     ax[1, 1].set_ylabel("MRL(g)")
     ax[1, 1].set_title("MRL in Transformed Time")
