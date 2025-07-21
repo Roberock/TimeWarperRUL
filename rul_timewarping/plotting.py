@@ -62,7 +62,6 @@ def plot_mixture_example(ttf_data1, ttf_data2, ttf_data3,
     ax[1, 0].legend()
 
     # Bottom right: MRL in transformed time
-
     idx_valid = s_plus > s_minus
     ax[1, 1].plot(g_vals, mrl_transformed, label="MRL (transformed time)", color="green")
     ax[1, 1].plot(g_vals[idx_valid], s_minus[idx_valid], label="Lower", color="red")
