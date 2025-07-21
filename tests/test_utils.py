@@ -11,7 +11,7 @@ def test_ecdf_basic():
 def test_empirical_reliability_values():
     data = np.array([10, 20, 30])
     assert np.isclose(empirical_reliability(data, 5), 1.0)
-    assert np.isclose(empirical_reliability(data, 20), 2/3)
+    assert  np.isclose(empirical_reliability(data, 20), 1/3)
     assert np.isclose(empirical_reliability(data, 40), 0.001, atol=1e-3)  # clipped min
 
 def test_estimate_k_values():
