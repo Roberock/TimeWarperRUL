@@ -3,8 +3,6 @@
 [![Coverage](https://coveralls.io/repos/github/Roberock/TimeWarperRUL/badge.svg?branch=main)](https://coveralls.io/github/Roberock/TimeWarperRUL?branch=main)
 [![Code Style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 
-
-
 # rul_timewarping
 
 A Python module for Remaining Useful Life (RUL) bound analysis and time warping, with bootstrap-based uncertainty quantification.

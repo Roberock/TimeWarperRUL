@@ -28,6 +28,7 @@ class TimeWarping:
         bw_method: Optional[Union[str, float, Callable]] = None
     ):
         self.ttf_data = ttf_data[ttf_data > 0]
+        self.ttf_data = ttf_data[~np.isnan(ttf_data)]
         self.N = len(self.ttf_data)
         self.mu = np.mean(self.ttf_data)
         self.cv = np.std(self.ttf_data) / (self.mu + 1e-6)

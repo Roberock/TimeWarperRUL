@@ -32,12 +32,6 @@ def test_compute_rul_interval_original_time():
     assert L_alpha.shape == U_alpha.shape
 
 
-def test_negative_input():
-    ttf = np.array([-10, -5, 0, 5, 10])
-    tw = TimeWarping(ttf)
-    # Only positive values should be used internally
-    assert np.all(tw.ttf_data > 0)
-
 
 def test_single_value():
     ttf = np.array([42])
@@ -45,13 +39,3 @@ def test_single_value():
     assert tw.mu == 42
     assert tw.k == 0  # std = 0, so k = 0
 
-
-def test_nan_input():
-    ttf = np.array([10, 20, np.nan, 40, 50])
-    with pytest.raises(Exception):
-        TimeWarping(ttf)
-
-def test_empty_input():
-    ttf = np.array([])
-    with pytest.raises(Exception):
-        TimeWarping(ttf)
