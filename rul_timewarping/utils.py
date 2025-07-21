@@ -23,7 +23,6 @@ def get_non_param_reliability(x_vals, ttf_data):
     return 1 - cdf
 
 
-
 # Function to estimate degradation slope k from TTF data
 def estimate_k(ttf_data):
     """ estimate k from time to failure data (via coefficient of variation)"""

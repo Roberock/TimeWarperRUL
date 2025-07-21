@@ -1,3 +1,5 @@
+import logging
+
 import numpy as np
 from scipy.ndimage import gaussian_filter1d
 from typing import Literal
@@ -21,21 +23,31 @@ class TimeWarping:
         self,
         ttf_data: np.ndarray
     ):
-        # Prepare data
+
         self.ttf_data = ttf_data[ttf_data > 0]
         self.N = len(ttf_data)
         self.mu = np.mean(self.ttf_data)
         self.cv = np.std(self.ttf_data)  / (self.mu + 1e-10)
-        self.kde = gaussian_kde(ttf_data)
-        k_est, mu_est, x_vals, g_vals, reliability = compute_g_non_parametric(ttf_data)
-        self.k = k_est
-        self.t_grid = x_vals
-        self._reliability = reliability
-        self._kde_cdf = 1 - reliability
 
-        # Compute g(t)
-        self.g_vals = g_vals
-        self.g_inv = self._get_g_inverse()
+        # Prepare data
+        if len(ttf_data) < 2:
+            self.kde = None
+            self.k = 0
+            self.t_grid = np.linspace(0, np.max(ttf_data), 5000)
+            self._reliability = None
+            self._kde_cdf = None
+            self.g_vals = None
+            self.g_inv =None
+        else:
+            self.kde = gaussian_kde(ttf_data)
+            k_est, mu_est, x_vals, g_vals, reliability = compute_g_non_parametric(ttf_data)
+            self.k = k_est
+            self.t_grid = x_vals
+            self._reliability = reliability
+            self._kde_cdf = 1 - reliability
+            # Compute g(t)
+            self.g_vals = g_vals
+            self.g_inv = self._get_g_inverse()
 
     def _make_grid(self) -> np.ndarray:
         """Create an evaluation grid combining percentiles and uniform spacing."""
