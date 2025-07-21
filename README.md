@@ -1,5 +1,5 @@
 ![CI](https://github.com/Roberock/TimeWarperRUL/actions/workflows/python-package.yml/badge.svg)
-[![Docs](https://readthedocs.org/projects/timewarperrul/badge/?version=latest)](https://timewarperrul.readthedocs.io/en/latest/)
+[![codecov](https://codecov.io/gh/Roberock/TimeWarperRUL/branch/master/graph/badge.svg)](https://codecov.io/gh/Roberock/TimeWarperRUL)
 [![Coverage](https://coveralls.io/repos/github/Roberock/TimeWarperRUL/badge.svg?branch=main)](https://coveralls.io/github/Roberock/TimeWarperRUL?branch=main)
 [![Code Style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 
