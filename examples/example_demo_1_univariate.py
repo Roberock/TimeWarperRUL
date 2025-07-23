@@ -38,13 +38,18 @@ def run_univariate_example_1():
 
 
     # Print some results
-    for i in range(min(10, len(g))):
-        print(f'RUL(g(t) = {g[i]:.2f}) = [{s_minus[i]:.2f}, {s_plus[i]:.2f}]')
+    print(f"{'Index':>5} | {'g(t)':>10} | {'RUL in g-space':>20} | {'t':>10} | {'RUL in t-space':>20}")
+    print("-" * 85)
+    n_samples = 10
+    indices = np.linspace(0, len(g) /2, n_samples, dtype=int)
+    for i in indices:
+        print(f"{i:5d} | {g[i]:10.2f} | [ {s_minus[i]:7.2f}, {s_plus[i]:7.2f} ] |"
+              f" {t[i]:10.2f} | [ {L_alpha[i]:7.2f}, {U_alpha[i]:7.2f} ]")
 
 
     ## VISUALIZE ------------------------
     # Show g(t) with inflection points, coordinates, and data distribution
-    fontsize = 16
+    fontsize = 18
     fig, axs = plt.subplots(1, 2, figsize=(18, 5))
 
     # 1. Left: g(t) with inflection points

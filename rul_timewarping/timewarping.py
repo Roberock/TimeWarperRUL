@@ -28,20 +28,31 @@ class TimeWarping:
         bw_method: Optional[Union[str, float, Callable]] = None
     ):
         if ttf_data is None:
-            self._initialize_class()
+            self._initialize_empty_class()
+            return
+
+        # Clean input TTF data
+        ttf_data = np.asarray(ttf_data)
+        ttf_data = ttf_data[(ttf_data > 0) & (~np.isnan(ttf_data))]  # at the moment assume clean data and non-censored
+
+        self.ttf_data = ttf_data
+        self.N = len(ttf_data)
+
+        if self.N < 2:
+            logging.warning("Insufficient TTF data (<2) for survival analysis.")
+            self._get_k_and_stats()  # Compute basic stats
+            return
+        self._get_k_and_stats()  # Compute basic stats
+        self._initialize_g_transform(bw_method)  # Initialize KDE and compute g(t)
+
+        if self.g_vals is None or len(self.g_vals) == 0:
+            logging.warning("g_vals computation failed.")
+            self.g_vals, self.g_inv, self.g_fun = None, None, None
         else:
-            self.ttf_data = ttf_data[ttf_data > 0]
-            self.ttf_data = ttf_data[~np.isnan(ttf_data)]
-            self.N = len(self.ttf_data)
-            self.mu = np.mean(self.ttf_data)
-            self.cv = np.std(self.ttf_data) / (self.mu + 1e-6)
-            self.k = np.clip((1 - self.cv ** 2) / (1 + self.cv ** 2), 1e-3, 0.999)
+            self.g_inv = interp1d(self.g_vals, self.t_grid, bounds_error=False, fill_value="extrapolate")
+            self.g_fun = interp1d(self.t_grid, self.g_vals, bounds_error=False, fill_value="extrapolate")
 
-            if self.N >= 2:
-                self._initialize_g_transform(bw_method)
-
-
-    def _initialize_class(self):
+    def _initialize_empty_class(self):
         self.kde = None
         self.t_grid = None
         self._reliability = None
@@ -54,6 +65,12 @@ class TimeWarping:
         self.mu = None
         self.cv = None
         self.k = None
+
+    def _get_k_and_stats(self):
+        self.mu = np.mean(self.ttf_data)
+        self.std = np.std(self.ttf_data)
+        self.cv = self.std / (self.mu + 1e-6)
+        self.k = np.clip((1 - self.cv ** 2) / (1 + self.cv ** 2), 1e-3, 0.999)
 
     def _initialize_g_transform(self, bw_method):
         # Fit KDE
@@ -70,12 +87,7 @@ class TimeWarping:
 
         # Compute numerical derivative of reliability
         self.g_vals = self._get_g_vals()
-        if self.g_vals is None or len(self.g_vals) == 0:
-            logging.warning("g_vals computation failed.")
-            self.g_vals, self.g_inv, self.g_fun = None, None, None
-        else:
-            self.g_inv = interp1d(self.g_vals, self.t_grid, bounds_error=False, fill_value="extrapolate")
-            self.g_fun = interp1d(self.t_grid, self.g_vals, bounds_error=False, fill_value="extrapolate")
+
 
     def _make_grid(self) -> np.ndarray:
         """Create an evaluation grid combining percentiles and uniform spacing."""

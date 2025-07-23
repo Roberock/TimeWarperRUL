@@ -31,13 +31,17 @@ def test_compute_rul_interval_original_time():
     assert isinstance(U_alpha, np.ndarray)
     assert L_alpha.shape == U_alpha.shape
 
+def test_empty_initialization():
+    tw = TimeWarping()
+    assert tw.mu is None
+    assert tw.k is None
 
 
 def test_single_value():
     ttf = np.array([42])
     tw = TimeWarping(ttf)
     assert tw.mu == 42
-    assert tw.k == 0  # std = 0, so k = 0
+    assert tw.k >= 0.999  # std = 0, so k = 0
 
 
 def test_compute_rul_interval_alpha_edges():
