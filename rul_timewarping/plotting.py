@@ -31,7 +31,6 @@ def plot_envelope_bounds(TimeWarper: TimeWarping):
     fontsize = 14
     linewidth = 2
 
-    time_g, time_t = TimeWarper.g_vals, TimeWarper.t_grid
     # Precompute MRL curves
     mrl_physical = compute_mrl(TimeWarper.t_grid, TimeWarper._reliability)
     mrl_transformed = compute_mrl(TimeWarper.g_vals, TimeWarper._reliability)
@@ -40,13 +39,22 @@ def plot_envelope_bounds(TimeWarper: TimeWarping):
     # Loop over alphas
     for alpha in alphas:
         s_plus, s_minus = TimeWarper.compute_rul_interval(TimeWarper.g_vals, alpha=alpha)
-        L_alpha, U_alpha = TimeWarper.compute_rul_interval_original_time(alpha=alpha)
+        L_alpha, U_alpha = TimeWarper._get_rul_interval_original_time(alpha=alpha)
 
+        time_g, time_t = TimeWarper.g_vals, TimeWarper.t_grid
+
+        index_2_keep = s_plus > 0
+        time_g = time_g[index_2_keep]
+        time_t = time_t[index_2_keep]
+        s_minus = s_minus[index_2_keep]
+        s_plus = s_plus[index_2_keep]
+        L_alpha = L_alpha[index_2_keep]
+        U_alpha = U_alpha[index_2_keep]
 
         if alpha == alphas[0]:
             # Plot MRL
-            axs[0].plot(time_g, mrl_transformed[:len(time_g)], color="red", label="MRL (g-space)", linewidth=linewidth)
-            axs[1].plot(time_t, mrl_physical[:len(time_t)], color="red", label="MRL (t-space)", linewidth=linewidth)
+            axs[0].plot(time_g, mrl_transformed[index_2_keep], color="red", label="MRL (g-space)", linewidth=linewidth)
+            axs[1].plot(time_t, mrl_physical[index_2_keep], color="red", label="MRL (t-space)", linewidth=linewidth)
 
         label_fill_g = rf"$s^{{\pm}}$ (α={alpha})"
         label_fill_t = rf"$L,U$ (α={alpha})"
@@ -95,7 +103,9 @@ def plot_mixture_example(ttf_data1, ttf_data2, ttf_data3,
                          ttf_data, x_vals, cdf,
                          mrl_physical, g_vals, mrl_transformed,
                          inflection_x, inflection_g,
-                         pdf, sign_change, s_plus, s_minus, L_alpha, U_alpha):
+                         pdf, idx_inflect_points, s_plus, s_minus,
+                         L_alpha, U_alpha):
+
 
     # Create 3x2 subplot
     fig, ax = plt.subplots(3, 2, figsize=(14, 10))
@@ -131,10 +141,9 @@ def plot_mixture_example(ttf_data1, ttf_data2, ttf_data3,
     ax[1, 0].legend()
 
     # Bottom right: MRL in transformed time
-    idx_valid = s_plus > s_minus
     ax[1, 1].plot(g_vals, mrl_transformed, label="MRL (transformed time)", color="green")
-    ax[1, 1].plot(g_vals[idx_valid], s_minus[idx_valid], label="Lower", color="red")
-    ax[1, 1].plot(g_vals[idx_valid], s_plus[idx_valid], label="Upper", color="red")
+    ax[1, 1].plot(g_vals, s_minus, label="Lower", color="red")
+    ax[1, 1].plot(g_vals, s_plus, label="Upper", color="red")
     ax[1, 1].set_xlabel("g(t)")
     ax[1, 1].set_ylabel("MRL(g)")
     ax[1, 1].set_title("MRL in Transformed Time")
@@ -153,7 +162,7 @@ def plot_mixture_example(ttf_data1, ttf_data2, ttf_data3,
 
     # Right: PDF with inflection markers
     ax[2, 1].plot(x_vals, pdf, color='navy', label="KDE PDF")
-    ax[2, 1].scatter(inflection_x, pdf[sign_change], color='red', zorder=5, label='Inflection Times')
+    ax[2, 1].scatter(inflection_x, pdf[idx_inflect_points], color='red', zorder=5, label='Inflection Times')
     ax[2, 1].set_xlabel("g(t)")
     ax[2, 1].set_ylabel("PDF")
     ax[2, 1].set_title("Inflection Points Mapped on KDE PDF")

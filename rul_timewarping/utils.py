@@ -53,6 +53,7 @@ def compute_g_non_parametric(ttf_data, bw_method=None):
 def compute_mrl(x_vals, R_vals):
     """ compute MRL(t) by tail integration of the reliability function values R_vals """
     mrl = []
+    R_vals[R_vals[-1] == R_vals] = 0
     for i, t in enumerate(x_vals):
         tail = x_vals[i:]
         R_tail = R_vals[i:]

@@ -26,7 +26,7 @@ def test_compute_rul_interval():
 def test_compute_rul_interval_original_time():
     ttf = np.linspace(1, 100, 100)
     tw = TimeWarping(ttf)
-    L_alpha, U_alpha = tw.compute_rul_interval_original_time()
+    L_alpha, U_alpha = tw._get_rul_interval_original_time()
     assert isinstance(L_alpha, np.ndarray)
     assert isinstance(U_alpha, np.ndarray)
     assert L_alpha.shape == U_alpha.shape

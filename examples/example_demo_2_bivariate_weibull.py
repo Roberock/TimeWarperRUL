@@ -5,11 +5,11 @@ from rul_timewarping.timewarping import TimeWarping
 from rul_timewarping.utils import compute_mrl, compute_g_non_parametric
 from rul_timewarping.plotting import plot_envelope_bounds
 
-def run_bivariate_example():
+def run_bivariate_example_2():
 
     np.random.seed(42)
     N1, N2 = 5_000, 3_000
-    ttf_data1 = np.random.weibull(a=2.5, size=N1) * 10000+1000
+    ttf_data1 = np.random.weibull(a=2.5, size=N1) * 10000+200
     ttf_data2 = np.random.weibull(a=2.5, size=N2) * 2000+2000
     ttf_data = np.concatenate((ttf_data1, ttf_data2))
 
@@ -32,7 +32,7 @@ def run_bivariate_example():
 
     # Compute RUL intervals
     s_plus, s_minus = TW.compute_rul_interval(time_g, alpha=alpha)
-    L_alpha, U_alpha = TW.compute_rul_interval_original_time(alpha=alpha)
+    L_alpha, U_alpha = TW._get_rul_interval_original_time(alpha=alpha)
 
     # Create subplots
     fig, ax = plt.subplots(1, 2, figsize=(14, 5))
@@ -87,6 +87,7 @@ def run_bivariate_example():
     plot_envelope_bounds(TW)
 
 
-# Press the green button in the gutter to run the script.
+
 if __name__ == '__main__':
-    run_bivariate_example()
+    # Press the green button in the gutter to run the script.
+    run_bivariate_example_2()

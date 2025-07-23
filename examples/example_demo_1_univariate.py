@@ -5,7 +5,7 @@ from rul_timewarping.timewarping import TimeWarping
 from rul_timewarping.utils import compute_mrl
 
 
-def run_univariate_example():
+def run_univariate_example_1():
     """
     Demonstrates univariate time warping on Weibull-distributed time-to-failure (TTF) data:
     - Transforms time using a learned warping function g(t)
@@ -34,7 +34,7 @@ def run_univariate_example():
 
     # Compute RUL intervals
     s_plus, s_minus = TW.compute_rul_interval(g, alpha=alpha)
-    L_alpha, U_alpha = TW.compute_rul_interval_original_time(alpha=alpha)
+    L_alpha, U_alpha = TW._get_rul_interval_original_time(alpha=alpha)
 
 
     # Print some results
@@ -92,4 +92,4 @@ def run_univariate_example():
 
 if __name__ == '__main__':
     # Press the green button in the gutter to run the script.
-    run_univariate_example()
+    run_univariate_example_1()
