@@ -61,3 +61,18 @@ def compute_mrl(x_vals, R_vals):
         mrl.append(integral / R_vals[i] if R_vals[i] > 1e-6 else 0)
     return np.array(mrl)
 
+
+
+from lifelines.utils import restricted_mean_survival_time
+def get_g_from_lifelines(survival_model, TimeWarp, TTF):
+    """ get g function from lifelines survival model"""
+    # get KM estimator of the reliability function
+    R_vals = survival_model.survival_function_[survival_model._label].values
+    # Mean and Variance of survival time from censored data
+    mu, var = restricted_mean_survival_time(survival_model,  t=TTF.max(),  return_variance=True)
+    # Compute coefficient of variation and shape parameter k
+    # cv = std / mean;  k = 1 - cv**2 / (1 + cv**2)
+    cv = np.sqrt(var) / mu
+    k = (1 - cv ** 2) / (1 + cv ** 2)
+    # Compute time transformation function T = g(t) that makes MRL linear in T
+    return TimeWarp.compute_g_fun(R=R_vals, k=k, mu=mu)

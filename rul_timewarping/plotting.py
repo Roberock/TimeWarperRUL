@@ -21,7 +21,7 @@ def plot_g_with_inflection(t_grid, g_vals, t_star, ci=None, color='blue', label=
     plt.tight_layout()
     plt.show()
 
-def plot_envelope_bounds(TimeWarper: TimeWarping):
+def plot_envelope_bounds(TimeWarper: TimeWarping, case= None):
     """
     Plot RUL envelopes at multiple alpha levels in original time and warped time domains.
     """
@@ -96,6 +96,8 @@ def plot_envelope_bounds(TimeWarper: TimeWarping):
     axs[1].legend(fontsize=fontsize - 2, loc='upper right')
 
     plt.tight_layout()
+
+
     plt.show()
 
 

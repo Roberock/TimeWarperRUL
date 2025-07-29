@@ -17,7 +17,7 @@ def run_bootstrap_inflection_points(ttf_data: np.ndarray,
         TW = TimeWarping(sample)
         t_star_i, g_star_i = TW.estimate_inflection_points(smooth_sigma)
 
-        if t_star_i <= np.max(ttf_data):
+        if np.all(t_star_i <= np.max(ttf_data)):
             t_inflection_samples.append(t_star_i)
             g_inflection_samples.append(g_star_i)
 

@@ -4,3 +4,4 @@ matplotlib>=3.4
 mpmath
 pytest
 pytest-cov
+lifelines

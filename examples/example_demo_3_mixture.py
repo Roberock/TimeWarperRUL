@@ -19,7 +19,7 @@ def run_main_mixture_example_3(CASE:int = 1):
     else:
         ttf_data1 = np.random.weibull(a=2, size=size) * 3500 + 2000
         ttf_data2 = np.random.weibull(a=3, size=size) * 2500 + 2000
-        ttf_data3 = np.random.weibull(a=6, size=size) * 1500 + 2000
+        ttf_data3 = np.random.weibull(a=6, size=size) * 1500 + 100
         ttf_data = np.concatenate((ttf_data1, ttf_data2, ttf_data3))
 
     TW = TimeWarping(ttf_data)
@@ -40,7 +40,7 @@ def run_main_mixture_example_3(CASE:int = 1):
     inflection_g = TW.g_vals[inflection_idx]
     plot_envelope_bounds(TW)
 
-    alpha=0.1
+    alpha = 0.05
     s_plus, s_minus = TW.compute_rul_interval(TW.g_vals, alpha=alpha)
     L_alpha, U_alpha = TW._get_rul_interval_original_time(alpha=alpha)
 

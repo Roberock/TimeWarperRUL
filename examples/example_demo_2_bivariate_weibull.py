@@ -8,9 +8,9 @@ from rul_timewarping.plotting import plot_envelope_bounds
 def run_bivariate_example_2():
 
     np.random.seed(42)
-    N1, N2 = 5_000, 3_000
+    N1, N2 = 2_000, 5_000
     ttf_data1 = np.random.weibull(a=2.5, size=N1) * 10000+200
-    ttf_data2 = np.random.weibull(a=2.5, size=N2) * 2000+2000
+    ttf_data2 = np.random.weibull(a=2.5, size=N2) * 4000+2000
     ttf_data = np.concatenate((ttf_data1, ttf_data2))
 
     # Initialize
@@ -24,11 +24,11 @@ def run_bivariate_example_2():
 
     time_g, time_t = TW.g_vals, TW.t_grid
     # Compute MRL
-    Reliability_values = TW._reliability  # get non parametric reliability estimate
+    R = TW._reliability  # get non parametric reliability estimate
 
     alpha = 0.1
-    mrl_physical = compute_mrl(time_t, Reliability_values)
-    mrl_transformed = compute_mrl(time_g, Reliability_values)
+    mrl_physical = compute_mrl(time_t, R)
+    mrl_transformed = compute_mrl(time_g, R)
 
     # Compute RUL intervals
     s_plus, s_minus = TW.compute_rul_interval(time_g, alpha=alpha)
@@ -60,6 +60,10 @@ def run_bivariate_example_2():
     ax[1].grid(True)
 
     plt.tight_layout()
+
+    plt.savefig('../plots/TTF_hist_and_inflection_case2.png')
+    plt.savefig('../plots/TTF_hist_and_inflection_case2.pdf')
+
     plt.show()
 
     fig, axs = plt.subplots(1, 2, figsize=(14, 6), sharey=True)
@@ -82,10 +86,13 @@ def run_bivariate_example_2():
     axs[1].grid(True)
     axs[1].legend()
     plt.tight_layout()
+
+    plt.savefig('../plots/MRL_bounds_case2.png')
+    plt.savefig('../plots/MRL_bounds_case2.pdf')
+
     plt.show()
 
     plot_envelope_bounds(TW)
-
 
 
 if __name__ == '__main__':

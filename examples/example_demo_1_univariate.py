@@ -4,22 +4,19 @@ import matplotlib.pyplot as plt
 from rul_timewarping.timewarping import TimeWarping
 from rul_timewarping.utils import compute_mrl
 
+"""
+Demonstrates univariate time warping on Weibull-distributed time-to-failure (TTF) data:
+- Transforms time using a learned warping function g(t)
+- Estimates nonparametric reliability and inflection points
+- Computes Mean Residual Life (MRL) and RUL intervals in both original and warped time
+- Visualizes MRL and RUL bounds in both domains
+"""
+
 
 def run_univariate_example_1():
-    """
-    Demonstrates univariate time warping on Weibull-distributed time-to-failure (TTF) data:
-    - Transforms time using a learned warping function g(t)
-    - Estimates nonparametric reliability and inflection points
-    - Computes Mean Residual Life (MRL) and RUL intervals in both original and warped time
-    - Visualizes MRL and RUL bounds in both domains
-    """
-    ttf_data = np.random.weibull(a=2.5, size=200) * 1000
-
-    # Initialize time warping
-    TW = TimeWarping(ttf_data)
-
-    # Extract time grid and transformed time
-    g, t = TW.g_vals, TW.t_grid
+    ttf_data = np.random.weibull(a=2.5, size=200) * 1000  # Sample time to failure
+    TW = TimeWarping(ttf_data)  # Initialize time warping
+    g, t = TW.g_vals, TW.t_grid  # Extract time grid and transformed time and reliability
     Reliability_values = TW._reliability
 
     # Estimate inflection points
@@ -67,6 +64,10 @@ def run_univariate_example_1():
     axs[1].set_title('Distribution of TTF Data', fontsize=fontsize)
     axs[1].grid(True)
     plt.tight_layout()
+
+    plt.savefig('../plots/TTF_hist_and_inflection_case1.png')
+    plt.savefig('../plots/TTF_hist_and_inflection_case1.pdf')
+
     plt.show()
 
 
@@ -92,6 +93,10 @@ def run_univariate_example_1():
     axs[1].grid(True)
 
     plt.tight_layout()
+
+    plt.savefig('../plots/MRL_bounds_case1.png')
+    plt.savefig('../plots/MRL_bounds_case1.pdf')
+
     plt.show()
 
 

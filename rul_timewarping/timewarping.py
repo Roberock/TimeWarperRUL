@@ -1,14 +1,13 @@
 import logging
 import numpy as np
-from scipy.ndimage import gaussian_filter1d
-from typing import Literal
-from rul_timewarping.utils import compute_g_non_parametric, get_non_param_reliability, compute_mrl
+from scipy.ndimage import gaussian_filter1d 
 from scipy.stats import gaussian_kde
 from scipy.interpolate import interp1d
 from typing import Optional, Callable, Union
 from scipy.signal import find_peaks
 from scipy.integrate import cumulative_trapezoid as cumtrapz
-from scipy.integrate import simpson as simps
+import matplotlib.pyplot as plt
+from lifelines import *
 
 class TimeWarping:
     """
@@ -27,8 +26,10 @@ class TimeWarping:
         ttf_data: Optional[np.ndarray] = None,
         bw_method: Optional[Union[str, float, Callable]] = None
     ):
+
+        self._initialize_empty_class()
+
         if ttf_data is None:
-            self._initialize_empty_class()
             return
 
         # Clean input TTF data
@@ -37,56 +38,46 @@ class TimeWarping:
 
         self.ttf_data = ttf_data
         self.N = len(ttf_data)
-
-        if self.N < 2:
-            logging.warning("Insufficient TTF data (<2) for survival analysis.")
-            self._get_k_and_stats()  # Compute basic stats
-            return
         self._get_k_and_stats()  # Compute basic stats
         self._initialize_g_transform(bw_method)  # Initialize KDE and compute g(t)
 
         if self.g_vals is None or len(self.g_vals) == 0:
             logging.warning("g_vals computation failed.")
-            self.g_vals, self.g_inv, self.g_fun = None, None, None
+            self.g_inv, self.g_fun = None, None
         else:
             self.g_inv = interp1d(self.g_vals, self.t_grid, bounds_error=False, fill_value="extrapolate")
             self.g_fun = interp1d(self.t_grid, self.g_vals, bounds_error=False, fill_value="extrapolate")
 
     def _initialize_empty_class(self):
-        self.kde = None
-        self.t_grid = None
-        self._reliability = None
-        self._kde_cdf = None
-        self.g_vals = None
-        self.g_inv = None
-        self.g_fun = None
-        self.ttf_data = None
-        self.N = 0
-        self.mu = None
-        self.cv = None
-        self.k = None
+        attrs = {  'kde': None, 't_grid': None, '_reliability': None, '_kde_cdf': None, 'g_vals': None,
+                   'g_inv': None, 'g_fun': None, 'ttf_data': None, 'N': 0, 'mu': None,
+                   'cv': None, 'k': None, 'g_max': None, 't_max': None }
+        for key, val in attrs.items():
+            setattr(self, key, val)
 
     def _get_k_and_stats(self):
         self.mu = np.mean(self.ttf_data)
         self.std = np.std(self.ttf_data)
-        self.cv = self.std / (self.mu + 1e-6)
-        self.k = np.clip((1 - self.cv ** 2) / (1 + self.cv ** 2), 1e-3, 0.999)
+        self.cv = self.std / self.mu
+        self.k = np.clip((1 - self.cv ** 2) / (1 + self.cv ** 2), 1e-6, 1 - 1e-6)
+        self.g_max = self.mu / (self.k + 1e-6)
+        self.t_max = np.max(self.ttf_data)
 
     def _initialize_g_transform(self, bw_method):
-        # Fit KDE
-        self.kde = gaussian_kde(self.ttf_data, bw_method)
-        self.t_grid = np.linspace(0, np.max(self.ttf_data) * 1.1, 5000)  # grid points in time
-
-        # Compute CDF of TTF and the Reliability function R(t)
-        pdf_on_grid = self.kde(self.t_grid)
+        self.kde = gaussian_kde(self.ttf_data, bw_method)  # Fit KDE
+        self.t_grid = np.linspace(0, self.t_max, 5000)  # grid points in time
+        pdf_on_grid = self.kde(self.t_grid)   # Compute CDF of TTF and the Reliability function R(t)
         pdf_on_grid[pdf_on_grid < 1e-6] = 0  # Remove negligible tails
-
         self._kde_cdf = cumtrapz(pdf_on_grid, self.t_grid, initial=0)  # get cdf of the LDE as integral of the pdf---?
         self._reliability = 1 - self._kde_cdf  #get reliability function
-        self._reliability[self._reliability[-1] == self._reliability] = 0 #
-
-        # Compute numerical derivative of reliability
         self.g_vals = self._get_g_vals()
+
+
+    def compute_mrl(self, t_eval: np.ndarray) -> np.ndarray:
+        R = interp1d(self.t_grid, self._reliability, fill_value="extrapolate")(t_eval)
+        expected = cumtrapz(self._reliability, self.t_grid, initial=0)
+        interp_E = interp1d(self.t_grid, expected, fill_value="extrapolate")
+        return (interp_E(np.max(self.t_grid)) - interp_E(t_eval)) / R
 
 
     def _make_grid(self) -> np.ndarray:
@@ -95,10 +86,12 @@ class TimeWarping:
         base = np.linspace(0, np.max(self.ttf_data), 200)
         return np.unique(np.concatenate([pcts, base]))
 
+
     def _empirical_reliability(self, t: float) -> float:
         """Empirical reliability R(t) from sorted samples."""
         idx = np.searchsorted(self.ttf_data, t, side='right')
         return float(np.clip(1 - idx / self.N, 1e-4, 1.0))
+
 
     def _get_g_vals(self) -> np.ndarray:
         """Compute g(t) = (mu/k) [1 - R(t)^(k/(1-k))] over the time grid."""
@@ -129,9 +122,7 @@ class TimeWarping:
         return inflection_x, inflection_g
 
     def compute_rul_interval(self, t: np.ndarray, alpha: float = 0.05) -> tuple[np.ndarray, np.ndarray]:
-        """
-        Compute upper and lower RUL interval bounds at time t.
-        """
+        """ Compute upper and lower RUL interval bounds at time t. """
         factor = self.mu / self.k - t
         exponent = self.k / (1 - self.k)
         s_plus = factor * (1 - (alpha / 2) ** exponent)
@@ -149,12 +140,20 @@ class TimeWarping:
         s_plus, s_minus = self.compute_rul_interval(self.g_vals[:len(self.g_vals)], alpha=alpha)
 
         # Compute input bounds for inverse interpolation
-        g_lower = np.clip(self.g_vals + s_minus, self.g_vals.min(), self.g_vals.max())
-        g_upper = np.clip(self.g_vals + s_plus, self.g_vals.min(), self.g_vals.max())
+        g_lower = np.clip(self.g_vals + s_minus, 0, self.g_max)
+        g_upper = np.clip(self.g_vals + s_plus, 0, self.g_max)
+
+        g_inv_lower =  self.g_inv(g_lower)
+        g_inv_upper = self.g_inv(g_upper)
+
+
 
         # Evaluate inverse only within the valid domain
-        L_alpha = np.maximum(0, self.g_inv(g_lower) - self.t_grid)
-        U_alpha = np.maximum(0, self.g_inv(g_upper) - self.t_grid)
+        L_alpha = np.maximum(0, g_inv_lower - self.t_grid)
+        U_alpha = np.maximum(0, g_inv_upper - self.t_grid)
+
+        U_alpha[np.isinf(g_inv_upper)] = np.min(U_alpha)  # fixme: dirty fix on upper bound
+
         return L_alpha, U_alpha
 
 

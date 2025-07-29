@@ -56,3 +56,19 @@ def test_compute_rul_interval_alpha_edges():
     assert np.all(s_plus_0 >= s_minus_0)
     assert np.all(s_plus_1 >= 0)
     assert np.all(s_minus_1 >= 0)
+
+
+def test_compute_mrl():
+    ttf = np.linspace(1, 100, 100)
+    tw = TimeWarping(ttf)
+    t = np.array([10, 20, 30])
+    mrl = tw.compute_mrl(t)
+
+    # Basic shape check
+    assert mrl.shape == t.shape
+
+    # MRL should be decreasing (monotonic hazard)
+    assert np.all(np.diff(mrl) <= 0)
+
+    # MRL must be positive
+    assert np.all(mrl > 0)

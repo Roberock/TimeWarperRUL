@@ -4,25 +4,10 @@ import matplotlib.pyplot as plt
 # from lifeline get data loader and KM fitter
 from lifelines import *
 from lifelines.datasets import load_waltons
-from lifelines.utils import restricted_mean_survival_time
 
 # get Time Warper
 from rul_timewarping.timewarping import TimeWarping
-
-
-def get_g_from_lifelines(survival_model, TimeWarp, TTF):
-    """ get g function from lifelines survival model"""
-    # get KM estimator of the reliability function
-    R_vals = survival_model.survival_function_[survival_model._label].values
-    # Mean and Variance of survival time from censored data
-    mu, var = restricted_mean_survival_time(survival_model,  t=TTF.max(),  return_variance=True)
-    # Compute coefficient of variation and shape parameter k
-    # cv = std / mean;  k = 1 - cv**2 / (1 + cv**2)
-    cv = np.sqrt(var) / mu
-    k = (1 - cv ** 2) / (1 + cv ** 2)
-
-    # Compute time transformation function T = g(t) that makes MRL linear in T
-    return TimeWarp.compute_g_fun(R=R_vals, k=k, mu=mu)
+from rul_timewarping.utils import get_g_from_lifelines
 
 
 def run_lifeline_demo_4():
@@ -56,6 +41,10 @@ def run_lifeline_demo_4():
     plt.ylabel('g(t)')
     plt.legend()
     plt.grid()
+
+    plt.savefig('../plots/g for KM estimator.png')
+    plt.savefig('../plots/g for KM estimator.pdf')
+
     plt.show()
 
     # show other examples with parametric models
@@ -89,6 +78,10 @@ def run_lifeline_demo_4():
         plt.ylabel('g(t)')
     plt.legend()
     plt.grid()
+
+    plt.savefig('../plots/compare_g_lifeline_fitters.png')
+    plt.savefig('../plots/compare_g_lifeline_fitters.pdf')
+
     plt.show()
 
 
