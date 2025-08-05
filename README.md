@@ -4,17 +4,22 @@
 
 # Time Warper 
 
-_**TimeWarperRUL**_ is a Python library for analyzing Remaining Useful Life (RUL) through time warping transformations.\
+_**TimeWarperRUL**_ is a Python library for analyzing Remaining Useful Life (RUL) through time warping transformations. 
 It provides parametric estimation of a nonlinear transformation function $t'=g(t)$:
+
 $$g(t)=\frac{\mu}{k} \left(1- R(t)^{\frac{k}{1-k}}  \right).$$
 
 By applying $g(t)$ non-linear possibly non-monotonic, Mean Residual Life MRL(t) functions are transformed in 
-linearly decreasing $MRL(t') = \mu  - kg(t)$ in the transformed time $t'$.\
+linearly decreasing $MRL(t') = \mu  - kg(t)$ in the transformed time $t'$. 
 
 This transformation allows analytical derivation of confidence bounds on the Remaining Useful Life RUL: 
-$$\text{RUL}(t') \in [s^-_\alpha(t'), s^+_\alpha(t')]$$  
+
+$$RUL(t') \in [s^-_\alpha(t'), s^+_\alpha(t')]$$  
+
+
 which can be transformed into non-linear RUL bounds in the original time: 
-$$\text{RUL}(t) \in [L_\alpha(t), U_\alpha(t)]$$
+
+$$RUL(t) \in [L_\alpha(t), U_\alpha(t)]$$
  
  
 ## 📚 Cite This Work
