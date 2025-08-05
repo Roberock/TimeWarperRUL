@@ -1,15 +1,12 @@
 # -*- coding: utf-8 -*-
 import autograd.numpy as np
 from lifelines.fitters import KnownModelParametricUnivariateFitter
-from lifelines.utils.safe_exp import safe_exp
 import lifelines # Import the top-level lifelines module
-from lifelines import utils, WeibullFitter, ExponentialFitter, LogNormalFitter, LogLogisticFitter, PiecewiseExponentialFitter, GeneralizedGammaFitter
 from typing import Optional, Callable, Union
 from scipy.signal import find_peaks
 import scipy.special as sc
 from scipy.integrate import trapezoid
 from scipy.interpolate import interp1d
-import matplotlib.pyplot as plt
 
 Allowed_Fitters = {'WeibullFitter', 'ExponentialFitter', 'LogNormalFitter',
                    'LogLogisticFitter', 'GeneralizedGammaFitter'}  # , 'PiecewiseExponentialFitter'

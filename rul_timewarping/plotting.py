@@ -1,6 +1,4 @@
-import numpy as np
 import matplotlib.pyplot as plt
-from scipy.stats import gaussian_kde
 from rul_timewarping.timewarping import TimeWarping
 from rul_timewarping.utils import *
 
@@ -21,7 +19,7 @@ def plot_g_with_inflection(t_grid, g_vals, t_star, ci=None, color='blue', label=
     plt.tight_layout()
     plt.show()
 
-def plot_envelope_bounds(TimeWarper: TimeWarping, case_number= None, axs = None):
+def plot_envelope_bounds(TimeWarper: TimeWarping, case_number= None, axs = None, save_plot=False):
     """
     Plot RUL envelopes at multiple alpha levels in original time and warped time domains.
     """
@@ -100,8 +98,8 @@ def plot_envelope_bounds(TimeWarper: TimeWarping, case_number= None, axs = None)
     axs[1].legend(fontsize=fontsize - 2, loc='upper right')
     axs[1].set_xlim([0, max(TimeWarper.ttf_data)])
     plt.tight_layout()
-
-    plt.savefig(f'../plots/plot_mixture_example_case{case_number}_nested_intervals.pdf')
+    if save_plot:
+        plt.savefig(f'../plots/plot_mixture_example_case{case_number}_nested_intervals.pdf')
     plt.show()
 
 
@@ -110,7 +108,7 @@ def plot_mixture_example(ttf_data1, ttf_data2, ttf_data3,
                          mrl_physical, g_vals, mrl_transformed,
                          inflection_x, inflection_g,
                          pdf, idx_inflect_points, s_plus, s_minus,
-                         L_alpha, U_alpha, case_number=0):
+                         L_alpha, U_alpha, case_number=0, save_plot=False):
     # Set global font size
     plt.rcParams.update({'font.size': 12})
 
@@ -178,6 +176,6 @@ def plot_mixture_example(ttf_data1, ttf_data2, ttf_data3,
     ax[2, 1].legend()
 
     plt.tight_layout()
-
-    plt.savefig(f'../plots/plot_mixture_example_case{case_number}.pdf')
+    if save_plot:
+        plt.savefig(f'../plots/plot_mixture_example_case{case_number}.pdf')
     plt.show()

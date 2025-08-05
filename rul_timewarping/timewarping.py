@@ -6,8 +6,7 @@ from scipy.interpolate import interp1d
 from typing import Optional, Callable, Union
 from scipy.signal import find_peaks
 from scipy.integrate import cumulative_trapezoid as cumtrapz
-import matplotlib.pyplot as plt
-from lifelines import *
+
 
 class TimeWarping:
     """
