@@ -52,7 +52,7 @@ See `examples/demos` for a more detailed example.
 Example of nested RUL intervals under a mixture model:
 
 <p align="center">
-  <img src="plots/plot_mixture_example_case1.png" alt="RUL Plot" width="400px">
+  <img src="plots/plot_mixture_example_case1.png" alt="RUL Plot" width="600px">
 </p>
 
 ## 🧠 Features
