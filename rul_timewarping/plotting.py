@@ -21,11 +21,13 @@ def plot_g_with_inflection(t_grid, g_vals, t_star, ci=None, color='blue', label=
     plt.tight_layout()
     plt.show()
 
-def plot_envelope_bounds(TimeWarper: TimeWarping, case= None):
+def plot_envelope_bounds(TimeWarper: TimeWarping, case_number= None, axs = None):
     """
     Plot RUL envelopes at multiple alpha levels in original time and warped time domains.
     """
-    fig, axs = plt.subplots(1, 2, figsize=(16, 6), sharey=True)
+    if axs is None:
+        fig, axs = plt.subplots(1, 2, figsize=(16, 6), sharey=True)
+
     color = 'blue'
     alphas = [0.5, 0.3, 0.20, 0.15, 0.1, 0.05, 0.02, 0.01, 0.001]
     fontsize = 14
@@ -44,6 +46,8 @@ def plot_envelope_bounds(TimeWarper: TimeWarping, case= None):
         time_g, time_t = TimeWarper.g_vals, TimeWarper.t_grid
 
         index_2_keep = s_plus > 0
+        index_2_keep = np.logical_and(s_plus > 0, np.gradient(time_g) > 0)
+
         time_g = time_g[index_2_keep]
         time_t = time_t[index_2_keep]
         s_minus = s_minus[index_2_keep]
@@ -94,10 +98,10 @@ def plot_envelope_bounds(TimeWarper: TimeWarping, case= None):
     axs[1].set_title('RUL vs $t$', fontsize=fontsize)
     axs[1].grid(True)
     axs[1].legend(fontsize=fontsize - 2, loc='upper right')
-
+    axs[1].set_xlim([0, max(TimeWarper.ttf_data)])
     plt.tight_layout()
 
-
+    plt.savefig(f'../plots/plot_mixture_example_case{case_number}_nested_intervals.pdf')
     plt.show()
 
 
@@ -106,9 +110,11 @@ def plot_mixture_example(ttf_data1, ttf_data2, ttf_data3,
                          mrl_physical, g_vals, mrl_transformed,
                          inflection_x, inflection_g,
                          pdf, idx_inflect_points, s_plus, s_minus,
-                         L_alpha, U_alpha):
+                         L_alpha, U_alpha, case_number=0):
     # Set global font size
     plt.rcParams.update({'font.size': 12})
+
+    idx = np.logical_and(s_plus > 0, np.gradient(g_vals) > 0)
 
     # Create 3x2 subplot
     fig, ax = plt.subplots(3, 2, figsize=(14, 10))
@@ -125,17 +131,18 @@ def plot_mixture_example(ttf_data1, ttf_data2, ttf_data3,
     ax[0, 0].grid(True)
 
     # Top right: CDF
-    ax[0, 1].plot(x_vals, cdf, label=r"CDF (KDE)", color='purple')
+    ax[0, 1].plot(x_vals[idx], cdf[idx], label=r"CDF (KDE)", color='purple')
     ax[0, 1].set_title(r"CDF of Mixture Data", fontsize=16)
     ax[0, 1].set_xlabel(r"Time $t$", fontsize=14)
     ax[0, 1].set_ylabel(r"$F(t)$", fontsize=14)
     ax[0, 1].grid(True)
     ax[0, 1].legend()
 
+
     # Bottom left: MRL in physical time
-    ax[1, 0].plot(x_vals, mrl_physical, label=r"$\text{MRL}(t)$", color="blue")
-    ax[1, 0].plot(x_vals, U_alpha, label=r"Upper bound", color="red")
-    ax[1, 0].plot(x_vals, L_alpha, label=r"Lower bound", color="red")
+    ax[1, 0].plot(x_vals[idx], mrl_physical[idx], label=r"$\text{MRL}(t)$", color="blue")
+    ax[1, 0].plot(x_vals[idx], U_alpha[idx], '--', label=r"Upper bound", color="red")
+    ax[1, 0].plot(x_vals[idx], L_alpha[idx], ':', label=r"Lower bound", color="red")
     ax[1, 0].set_xlabel(r"$t$", fontsize=14)
     ax[1, 0].set_ylabel(r"$\text{MRL}(t)$", fontsize=14)
     ax[1, 0].set_title(r"Mean Residual Life in Physical Time", fontsize=16)
@@ -143,17 +150,17 @@ def plot_mixture_example(ttf_data1, ttf_data2, ttf_data3,
     ax[1, 0].legend()
 
     # Bottom right: MRL in transformed time
-    ax[1, 1].plot(g_vals, mrl_transformed, label=r"$\text{MRL}(g)$", color="green")
-    ax[1, 1].plot(g_vals, s_minus, label=r"Lower bound", color="red")
-    ax[1, 1].plot(g_vals, s_plus, label=r"Upper bound", color="red")
+    ax[1, 1].plot(g_vals, mrl_transformed, label=r"$\text{MRL}(t')$", color="green")
+    ax[1, 1].plot(g_vals, s_minus, '--' ,label=r"Lower bound", color="red")
+    ax[1, 1].plot(g_vals, s_plus, ':', label=r"Upper bound", color="red")
     ax[1, 1].set_xlabel(r"$g(t)$", fontsize=14)
-    ax[1, 1].set_ylabel(r"$\text{MRL}(g)$", fontsize=14)
+    ax[1, 1].set_ylabel(r"$\text{MRL}(t')$", fontsize=14)
     ax[1, 1].set_title(r"Mean Residual Life in Transformed Time", fontsize=16)
     ax[1, 1].grid(True)
     ax[1, 1].legend()
 
     # Left bottom: g(t) with inflection points
-    ax[2, 0].plot(x_vals, g_vals, label=r"$g(t)$", color='black')
+    ax[2, 0].plot(x_vals[idx], g_vals[idx], label=r"$g(t)$", color='black')
     ax[2, 0].scatter(inflection_x, inflection_g, color='red', zorder=5, label='Inflection Points')
     ax[2, 0].set_xlabel(r"Time $t$", fontsize=14)
     ax[2, 0].set_ylabel(r"$g(t)$", fontsize=14)
@@ -162,13 +169,15 @@ def plot_mixture_example(ttf_data1, ttf_data2, ttf_data3,
     ax[2, 0].legend()
 
     # Right bottom: PDF with inflection markers
-    ax[2, 1].plot(x_vals, pdf, color='navy', label=r"KDE PDF")
+    ax[2, 1].plot(x_vals[idx], pdf[idx], color='navy', label=r"KDE")
     ax[2, 1].scatter(inflection_x, pdf[idx_inflect_points], color='red', zorder=5, label='Inflection Times')
-    ax[2, 1].set_xlabel(r"$t$", fontsize=14)
-    ax[2, 1].set_ylabel(r"$f(t)$", fontsize=14)
+    ax[2, 1].set_xlabel(r"Time $t$", fontsize=14)
+    ax[2, 1].set_ylabel(r"$PDF$", fontsize=14)
     ax[2, 1].set_title(r"Inflection Points on PDF", fontsize=16)
     ax[2, 1].grid(True)
     ax[2, 1].legend()
 
     plt.tight_layout()
+
+    plt.savefig(f'../plots/plot_mixture_example_case{case_number}.pdf')
     plt.show()

@@ -146,8 +146,6 @@ class TimeWarping:
         g_inv_lower =  self.g_inv(g_lower)
         g_inv_upper = self.g_inv(g_upper)
 
-
-
         # Evaluate inverse only within the valid domain
         L_alpha = np.maximum(0, g_inv_lower - self.t_grid)
         U_alpha = np.maximum(0, g_inv_upper - self.t_grid)

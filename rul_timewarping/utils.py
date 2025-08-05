@@ -58,7 +58,7 @@ def compute_mrl(x_vals, R_vals):
         tail = x_vals[i:]
         R_tail = R_vals[i:]
         integral = simps(R_tail, tail)
-        mrl.append(integral / R_vals[i] if R_vals[i] > 1e-6 else 0)
+        mrl.append(integral / R_vals[i] if R_vals[i] > 1e-9 else 0)
     return np.array(mrl)
 
 

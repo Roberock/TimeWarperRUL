@@ -5,3 +5,4 @@ mpmath
 pytest
 pytest-cov
 lifelines
+scikit-learn

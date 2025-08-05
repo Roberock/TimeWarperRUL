@@ -7,9 +7,42 @@ from rul_timewarping.utils import compute_mrl, compute_g_non_parametric
 
 from scipy.signal import find_peaks
 
+def check_inflection_ok(TW, inflection_idx):
+    # 1. Estimate PDF f(t) via your KDE object, and survival R(t):
+    pdf_vals = TW.kde(TW.t_grid)  # f(t)
+    R_vals = TW._reliability  # R(t)
+
+    # 2. Compute hazard lambda(t) = f/R
+    lambda_vals = pdf_vals / R_vals
+
+    # 3. Compute derivatives dλ/dt and d(log λ)/dt by finite differences
+    d_lambda_dt = np.gradient(lambda_vals, TW.t_grid)
+    d_loglambda_dt = np.gradient(np.log(lambda_vals), TW.t_grid)
+
+    # 4. Grab your slope k
+    k = TW.k
+
+    # 5. For each inflection index, compute residuals for (A0) and (A1)
+    t_star_list = TW.t_grid[inflection_idx]
+    lam_star = lambda_vals[inflection_idx]
+    dlam_star = d_lambda_dt[inflection_idx]
+    dlogl_star = d_loglambda_dt[inflection_idx]
+
+    # 6. Evaluate residuals
+    r0 = dlam_star - (k / (1 - k)) * lam_star ** 2
+    r1 = dlogl_star - (k / (1 - k)) * lam_star
+
+    # 7. Report
+    for i, t_star in enumerate(t_star_list):
+        print(f"t* = {t_star:.3f}")
+        print(f"  (A0) residual: {r0[i]:.3e}")
+        print(f"  (A1) residual: {r1[i]:.3e}")
+        print("  passes?", np.allclose([r0[i], r1[i]], [0, 0], atol=1e-2))
+        print("-" * 40)
+
 
 def run_main_mixture_example_3(CASE:int = 1):
-    size = 2000
+    size = 20_000
     np.random.seed(42)
     if CASE == 1: # CASE 1 Simulated TTF mixture data
         ttf_data1 = np.random.weibull(a=5.5, size=size) * 2500
@@ -35,10 +68,10 @@ def run_main_mixture_example_3(CASE:int = 1):
     dg_dt = np.gradient(TW.g_vals, TW.t_grid)
 
     inflection_idx, _ = find_peaks(dg_dt)
-    inflection_x, inflection_g = TW.estimate_inflection_points()
+    # inflection_x, inflection_g = TW.estimate_inflection_points()
     inflection_x = TW.t_grid[inflection_idx]
     inflection_g = TW.g_vals[inflection_idx]
-    plot_envelope_bounds(TW)
+    plot_envelope_bounds(TW, case_number=CASE)
 
     alpha = 0.05
     s_plus, s_minus = TW.compute_rul_interval(TW.g_vals, alpha=alpha)
@@ -49,14 +82,16 @@ def run_main_mixture_example_3(CASE:int = 1):
                          mrl_physical, TW.g_vals, mrl_transformed,
                          inflection_x, inflection_g,
                          TW.kde(TW.t_grid), inflection_idx,
-                         s_plus, s_minus, L_alpha, U_alpha)
+                         s_plus, s_minus, L_alpha, U_alpha, case_number=CASE)
+
+    check_inflection_ok(TW, inflection_idx)
 
 
 
 if __name__ == '__main__':
     # Press the green button in the gutter to run the script.
     run_main_mixture_example_3(CASE=1)
-    run_main_mixture_example_3(CASE=2)
+    # run_main_mixture_example_3(CASE=2)
 
 
 

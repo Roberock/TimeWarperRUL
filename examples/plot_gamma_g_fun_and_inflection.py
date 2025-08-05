@@ -37,8 +37,8 @@ def run_gamma_parametric_example(lambd = 0.0478):
         plt.scatter(t_max, g_max, color=col)
     plt.legend()
     plt.grid()
-    plt.xlabel(r'$t$ [h]')
-    plt.ylabel(r'$g(t)$ [h]')
+    plt.xlabel(r'$t$ [h]', fontsize=16)
+    plt.ylabel(r'$g(t)$ ', fontsize=16)
 
     plt.savefig('../plots/g for Gamma.png')
     plt.savefig('../plots/g for gamma.pdf')
