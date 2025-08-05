@@ -15,7 +15,7 @@ linearly decreasing $MRL(t') = \mu  - kg(t)$ in the transformed time $t'$.
 This transformation allows analytical derivation of confidence bounds on the Remaining Useful Life RUL: 
 
 $$RUL(t') \in [s^{-}_\alpha(t'), s^{+}_\alpha(t')]$$  
-
+$$RUL(t') \in [s^{-}_\alpha(t), s^{+}_\alpha(t)]$$
 
 which can be transformed into non-linear RUL bounds in the original time: 
 
