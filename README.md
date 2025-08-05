@@ -12,11 +12,7 @@ $$g(t)=\frac{\mu}{k} \left(1- R(t)^{\frac{k}{1-k}}  \right).$$
 By applying $g(t)$ non-linear possibly non-monotonic, Mean Residual Life MRL(t) functions are transformed in 
 linearly decreasing $MRL(t') = \mu  - kg(t)$ in the transformed time $t'$
 
-This transformation allows analytical derivation of confidence bounds on the Remaining Useful Life RUL $RUL(t') \in [s^{-}_\alpha(t'), s^{+}_\alpha(t')]$ 
-
-$$RUL(t') \in [s^{l}_\alpha(t), s^{u}_\alpha(t)]$$
-
-which can be transformed into non-linear RUL bounds in the original time: 
+This transformation allows analytical derivation of confidence bounds on the Remaining Useful Life RUL, which can be transformed into non-linear RUL bounds in the original time: 
 
 $$RUL(t) \in [L_\alpha(t), U_\alpha(t)]$$
  
